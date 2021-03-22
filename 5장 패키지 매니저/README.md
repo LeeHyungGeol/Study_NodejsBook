@@ -151,12 +151,35 @@ ex) package.json
 
 ## 기타 npm 명령어
 
-npm outdated : 업데이트할 수 있는 패키지가 있는지 확인
+`npm outdated` : 업데이트할 수 있는 패키지가 있는지 확인
 
 * Current, Wanted가 다르다면 업데이트가 필요한 경우이다.
 
-npm update [패키지명] : 패키지 업데이트 가능. 업데이트 가능한 모든 패키지가 Wanted에 적힌 버전으로 update된다. 
+`npm update [패키지명]` : 패키지 업데이트 가능. 업데이트 가능한 모든 패키지가 Wanted에 적힌 버전으로 update된다. 
 
+* npm update를 하면 업데이트 가능한 모든 패키지가 Wanted에 적힌 버전으로 update된다.
+
+`npm uninstall [패키지명]` : 해당 패키지를 제거하는 명령어. 패키지가 package.json과 node_modules 폴더에서 사라진다. `npm rm [패키지명]`으로 줄여 쓸 수도 있다.
+
+`npm search [검색어]` : npm의 패키지를 검색할 수 있다.
+
+`npm info [패키지명]` : 패키지의 세부 정보를 파악하고자 할 때 사용하는 명령어. package.json의 내용과 의존 관계, 설치 가능한 버전 정보 등이 표시된다.
+
+`npm adduser` : npm 로그인을 위한 명령어. npm 공식 사이트에서 가입한 계정으로 로그인하면 된다. 
+ * 나중에 패키지를 배포할 때 로그인이 필요하다.
+ * 패키지를 배포하지 않을 것이라면 npm에 가입할 필요는 없다.
+
+`npm whoami` : 로그인한 사용자가 누구인지 알려준다. 로그인된 상태가 아니라면 에러가 발생한다.
+
+`npm logout` : npm adduser로 로그인한 계정을 로그아웃할 때 사용한다.
+
+`npm version [버전]` : package.json 버전을 올린다. 원하는 버전의 숫자를 넣으면 된다.
+* major, minor, patch라는 문자열을 넣어서 해당 부분의 숫자를 1 올릴 수도 있다.
+
+`npm deprecate [패키지명] [버전] [메시지]` : 해당 패키지를 설치할 때 경고 메시지를 띄우게 하는 명령어. 자신의 패키지에만 이 명령어를 적용. deprecated 처리를 하면 다른 사용자들이 버그가 있는 버전의 패키지를 설치할 때 경고 메시지가 출력된다.
+
+`npm ci` : package.json 대신 package-lock.json에 기반하여 패키지를 설치. 더 엄격하게 버전을 통제하여 패키지를 설치하고 싶을 때 사용.
+ 
 
  
 
