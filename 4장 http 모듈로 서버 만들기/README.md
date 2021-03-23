@@ -109,7 +109,7 @@ ex) **REST에 기반한 서버 주소 구조**
 * **Set-Cookie로 쿠키를 설정할 때 옵션(Option)들을 부여할 수 있다.**
 
 ```js
- 'Set-Cookie' : `name={encodeURIComponent(name)}; Expires=${expires.toGMTString()}; HttpOnly; Path=/` 
+ 'Set-Cookie' : `name=${encodeURIComponent(name)}; Expires=${expires.toGMTString()}; HttpOnly; Path=/` 
 ```
 
 * 옵션(Option)사이에 `세미콜론(;)`을 써서 구분하면 된다.
