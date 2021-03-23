@@ -25,6 +25,7 @@ app.use(session({
   name: 'session-cookie',
 }));
 
+//----- use multer for multipart data -----//
 const multer = require('multer');
 const fs = require('fs');
 
@@ -56,6 +57,8 @@ app.post('/upload', upload.single('image'), (req, res) => {
   console.log(req.file);
   res.send('ok');
 });
+//----- use multer for multipart data -----//
+
 
 app.get('/', (req, res, next) => {
   console.log('GET / 요청에서만 실행됩니다.');
