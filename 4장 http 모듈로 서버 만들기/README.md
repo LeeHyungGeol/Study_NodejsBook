@@ -54,20 +54,20 @@
 **REST : REpresential State Transfer : `서버의 자원`을 정의하고, `자원에 대한 주소`를 지정하는 방법**
 * 자원이라고 해서 꼭 파일일 필요는 없다. **서버가 행할 수 있는 것들을 통틀어서 의미**한다.
 
-* GET : **서버 자원을 가져오고자** 할 때 사용한다. 
-  * **요청의 본문에 데이터를 넣지 않는다.** 
-  * data를 server로 보내야 한다면 **queryString을 사용**한다.
+* GET : 서버 자원을 `가져오고자` 할 때 사용한다. 
+  * ***요청의 본문에 데이터를 넣지 않는다.*** 
+  * data를 server로 보내야 한다면 **querystring을 사용**한다.
 
-* POST : **서버에 자원을 새로 등록**하고자 할 때 사용한다.
+* POST : 서버에 자원을 `새로 등록`하고자 할 때 사용한다.
   * 요청의 본문에 새로 등록할 data를 넣어 보낸다.
 
-* PUT : 서버에 자원을 **요청에 들어있는 자원으로 치환**하고자 할 때 사용한다. 
+* PUT : 서버에 자원을 요청에 들어있는 자원으로 `치환`하고자 할 때 사용한다. 
   * 요청의 본문에 치환할 data를 넣어 보낸다.
 
-* PATCH : 서버 자원을 **일부만 수정**하고자 할 때 사용한다.
+* PATCH : 서버 자원을 `일부만 수정`하고자 할 때 사용한다.
   * 요청의 본문에 일부 수정할 data를 넣어 보낸다.
 
-* DELETE : 서버 자원을 **삭제**하고자 할 때 사용한다.
+* DELETE : 서버 자원을 `삭제`하고자 할 때 사용한다.
   * 요청의 본문에 data를 넣지 않는다.
 
 * OPTIONS : 요청을 하기 전에 통신 옵션을 설명하기 위해 사용한다.    
@@ -76,7 +76,7 @@
   
 * GET 메서드의 경우, 브라우저에서 캐싱(Cacheing)(기억)할 수도 있으므로 GET 요청을 할 때 서버가 아닌 캐시(Cache)에서 가져올 수 있다.
 
-* **res.end() 앞에 return을 붙이는 이유!!** 
+* ***res.end() 앞에 return을 붙이는 이유!!*** 
   * Node도 일반적인 JavaScript문법을 따르므로 return을 붙이지 않는 한 함수가 종료되지 않는다. ***따라서 다음에 코드가 이어질 경우에는 return을 써서 명시적으로 함수를 종료한다.***
   * retuen을 붙이지 않고 res.end()같은 메서드가 여러 번 실행된다면 ***Error: Can't set headers after they are sent to the client*** 에러가 발생한다. 
 
@@ -146,14 +146,14 @@ ex) **REST에 기반한 서버 주소 구조**
 
 ## HTTP와 HTTP2
 
-**`https 모듈`은 웹 서버에 SSL 암호화를 추가한다.**
+***`https 모듈`은 웹 서버에 `SSL 암호화`를 추가한다.***
   * GET, POST 요청을 할 때 오가는 data를 암호화해서 중간에 다른 사람이 요청을 가로채덜도 내용을 확인할 수 없게 한다.
   * 요즘은 login이나 payment가 필요한 창에서 HTTPS 적용이 필수가 되는 추세이다.
   * `암호화`를 적용하려면 `https 모듈`을 사용해야 한다.
     * https는 아무나 사용할 수 있는 것이 아니다.
     * 암호화를 적용하는 만큼, 그것을 **인증해줄 수 있는 기관이 필요**하다.
     * `인증서`를 `인증 기관`에서 구입하거나, `Let's Encrypt` 같은 기관에서 `무료로 발급`해주기도 한다. 
-    * 인증서를 구입하면 `pem, crt, key 확장자를 가진 파일들`을 제공한다. 각각을 `fs.readFileSync 메서드`로 읽어서 `cert(도메인 인증서), key(도메인 비킬키), ca(상위 인증서) 옵션`에 맞게 넣으면 된다.
+    * 인증서를 구입하면 `pem, crt, key 확장자를 가진 파일들`을 제공한다. 각각을 `fs.readFileSync 메서드`로 읽어서 `cert(도메인 인증서), key(도메인 비밀키), ca(상위 인증서) 옵션`에 맞게 넣으면 된다.
     * 도메인도 필요하다.
     * 실제 Server에서는 80 Port 대신 `443 Port`를 사용하면 된다.
   
@@ -167,10 +167,17 @@ ex) server1-3.js
 const https = require('https');
 const fs = require('fs');
 
+// createServer 메서드가 인수를 2개 받는다.
+//   첫번째 인수 : 인증서 관련 옵션들
+//   두번째 인수 : http모듈과 같은 Server로직
+
 https.createServer( {
   cert : readFileSync('도메인 인증서 경로'),
   key : readFileSync('도메인 비밀키 경로'),
-  }, (req, res) => {
+  ca : [
+      fs.readFileSync('상위 인증서 경로'),
+      fs.readFileSync('상위 인증서 경로'),
+  ] }, (req, res) => {
      res.writeHead(200, {'Content-Type' : 'text/html; charset=utf-8'});
     res.write('<h1>Hello Node!</h1>');
     res.end('<p>Hello Server</p>');
