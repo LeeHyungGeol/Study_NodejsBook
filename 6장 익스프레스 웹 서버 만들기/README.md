@@ -125,6 +125,35 @@ app.get('/', (req, res, next) => {
 * `res.status 메서드`로 HTTP 상태 코드를 지정할 수 있다. 기본값은 200(성공)이다.
 * 에러 처리 미들웨어는 특별한 경우가 아니라면 ***맨 밑에 위치***하는 것이 좋다. 실무에서는 직접 에러 처리 미들웨어를 연결해주는 것이 좋다.
 
+```js
+// 404 응답 미들웨어
+app.use((req, res, next) => {
+    const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
+    error.status = 404;
+    next(error);
+});
+
+// 에러 처리 미들웨어
+app.use((err, req, res, next) => {
+    res.locals.message = err.message;
+    res.locals.error = process.env.NODE_ENV === 'production' ? {} : err;
+    res.status(err.status || 500);
+    res.render('error');
+});
+```
+
+* 404 에러가 발생한다면 res.locals.message 는 *${req.method} ${req.url} 라우터가 없습니다* 가 된다.
+
+* 에러 처리 미들웨어는 **error라는 템플릿 파일을 렌더링**한다.
+
+* 렌더링 시 **res.locals.message 와 res.locals.error 가 함께 렌더링** 된다.
+
+* ***res.render 에 변수값을 대입하는 것 외에도, res.locals 속성에 값을 넣어서 템플릿 엔진에 변수를 주입할 수 있다.***
+
+* error 객체의 스택 트레이스(error.html 의 error.stack)는 시스템 환경(process.env.NODE_ENV)이 배포 환경(production)이 아닌 경우에만 표시한다.
+  * 배포환경인 경우에는 에러 메시지만 표시된다. 
+  * ***에러 스택 트레이스가 노출되면 보안에 취약할 수 있기 때문이다.***
+
 ---
 
 ### **dotenv**
@@ -256,6 +285,15 @@ res.clearCookie('name', 'lee', { httpOnly : true, secure : true, signed : true }
 
 옵션들 : domain, expires, maxAge, httpOnly, path, secure, signed
 
+* `쿠키명=쿠키값` : ***기본적인 쿠키의 값.*** ex) mycookie=test 또는 name=Sam
+
+* `expires=날짜` : ***만료 기한.*** 이 기한이 지나면 쿠키가 제거된다. ***기본값(default)은 클라이언트가 종료될 때까지이다.***
+* `maxAge=초` : Expires와 비슷하지만 **날짜 대신 초를 입력할 수 있다.** 해당 초가 지나면 쿠기가 제거된다. ***Expires보다 우선한다.***
+* `domain=도메인명` : ***쿠키가 전송될 도메인을 특정***할 수 있다. 기본값은 현재 도메인이다.
+* `path=URL` : ***쿠키가 전송될 URL을 특정***할 수 있다. 기본값은 '/'이다. 이 경우 모든 URL에서 쿠키를 전송할 수 있다.
+* `secure` : HTTPS일 경우에만 쿠키가 전송된다.
+* `httpOnly` : 설정 시 자바스크립트에서 쿠키에 접근할 수 없다. ***쿠키 조작을 방지하기 위해 설정하는 것이 좋다.***   
+
 ***쿠키를 지우려면 옵션 값들도 정확히 일치해야 쿠키가 지워진다. 단 expires, maxAge 옵션은 일치하지 않아도 된다.***
 
 `signed 옵션` : signed 옵션을 **true** 로 설정할 시에 **쿠키 뒤에 서명**이 붙는다. 서버가 쿠키를 만들었다는 것을 검증하기 위해 대부분 켜놓는다.
@@ -281,15 +319,15 @@ app.use(session({
         httpOnly : true,
         secure : false,
     },
-    name : 'session-cookie',
+    name : 'session-cookie', //`express-session` 은 세션 관리시 `클라이언트에 쿠키를 보낸다.`
 }));
 ```
 
 세션에 대한 설정
 * `resave` : 요청이 올 때, 세션에 수정 사항이 생기지 않더라도 세션을 다시 저장할지 설정하는 것
 * `saveUninitialized` : 세션에 저장할 내역이 없더라도 처음부터 세션을 생성할지 설정하는 것
-* **`session cookie`** : express-session 은 세션 관리시 클라이언트에 쿠키를 보낸다.
-  * `secret` : 쿠키에 서명을 추가하기 위해 사용한다. **cookie-parser 의 secret 과 같게 설정한다.** 
+* **`session-cookie`** : `express-session` 은 세션 관리시 `클라이언트에 쿠키를 보낸다.`
+  * `secret` : `쿠키에 서명`을 추가하기 위해 사용한다. **cookie-parser 의 secret 과 같게 설정한다.** 
 * `name` : 세션 쿠키의 이름을 설정. 기본값은 connect.sid 이다.
 * `cookie` : 쿠키에 대한 옵션을 설정한다. domain, expires, maxAge, httpOnly, path, secure 등 기본적인 쿠키 옵션과 동일하게 설정 가능하다.
 * `store` : 현재는 메모리에 세션을 저장하지만, 메모리에 세션을 저장하면 서버가 재시작하면 초기화되어 세션들이 모두 사라진다.
@@ -541,7 +579,42 @@ router.route('/abc')
 
 ---
 
-## **req, res 객체**
+## **req, res `객체`**
+
+### **req**
+
+* `req.app` :  req 객체를 통해 app 객체에 접근할 수 있다. ex) req.app.get('port') 와 같이 사용 가능하다.
+* `req.body` : `body-parser 미들웨어`가 요청의 본문(body)를 해석한 `객체`
+* `req.cookies` : `cookie-parser 미들웨어`가 요청의 cookie를 해석한 `객체`
+* `req.signedCookies` : 서명된 쿠키들은 req.cookies가 아닌 여기에 담겨있다.
+* `req.ip` : 요청의 ip 주소가 담겨있다.
+* `req.params` : `라우트 매개변수`에 대한 정보가 담긴 `객체`
+* `req.query` : querystring에 대한 정보가 담긴 `객체`
+* `req.get(헤더 이름)` : header의 값을 가져오고 싶을 때 사용하는 `메서드`
+
+### **res**
+
+* `res.app` : req.app 처럼 res 를 통해 app 객체에 접근할 수 있다.
+* `res.cookie(키, 값, 옵션)` : 쿠키를 설정하는 `메서드`
+* `res.clearCookie(키, 값, 옵션)` : 쿠키를 삭제하는 `메서드`
+* `res.end()` : 데이터 없이 응답을 보낸다.
+* `res.json(JSON)` : JSON 형식으로 응답을 보낸다.
+* `res.redirect(주소)` : 리다이렉트할 주소와 함께 응답을 보낸다.
+* `res.render(뷰, 데이터)` : `템플릿 엔진을 렌더링`해서 응답할 때 사용하는 메서드
+* `res.send(데이터)` : 데이터와 함께 응답한다. 데이터 : 문자열, HTML, Buffer, 객체, 배열일 수도 있다.
+* `res.sendFile(경로)` : 경로에 있는 파일을 응답한다.
+* `res.set(헤더, 값)` : `응답의 헤더`를 설정한다.
+* `res.status(코드)` : 응답 시의 `HTTP 상태 코드`를 지정
+  
+활용법 : **`메서드 체이닝`** ex) 
+
+```js
+res
+    .status(201)
+    .cookie('name', 'test1')
+    .redirect('/admin');
+```
+
 
 
 
